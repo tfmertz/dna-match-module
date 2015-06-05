@@ -1,0 +1,67 @@
+<?php
+
+class testMyDnaModule extends DrupalUnitTestCase {
+
+    //create the info for the testing page
+    public static function getInfo() {
+        return array(
+            'name' => 'My Dna Unit Tests',
+            'description' => 'Unit tests for the DNA Matcher page.',
+            'group' => 'My Tests',
+        );
+    }
+
+    //tests for match_dna function
+    function test_match_dna() {
+        $result = match_dna('A');
+        $this->assertEqual($result, 'T');
+
+        $result = match_dna('T');
+        $this->assertEqual($result, 'A');
+
+        $result = match_dna('C');
+        $this->assertEqual($result, 'G');
+
+        $result = match_dna('G');
+        $this->assertEqual($result, 'C');
+
+        $result = match_dna('A T');
+        $this->assertEqual($result, 'T A');
+
+        $result = match_dna('C G');
+        $this->assertEqual($result, 'G C');
+
+        $result = match_dna('A T A A G C');
+        $this->assertEqual($result, 'T A T T C G');
+    }
+}
+
+//web form tests
+class testMyDnaModuleWeb extends DrupalWebTestCase {
+
+    //create the info the for the testing page
+    public static function getInfo() {
+        return array(
+            'name' => 'My DNA Web Test',
+            'description' => 'Tests that the web form submission is working.',
+            'group' => 'My Tests',
+        );
+    }
+
+    //set up the file
+    public function setUp() {
+        //grab the modules we need
+        parent::setUp(array('mydna'));
+
+        //create the form to submit with the content we want to submit
+        $info['dna_input'] = 'A T C G T A';
+        //submit the form info
+        $this->drupalPost('dna-matcher', $info, t('Match'));
+    }
+
+    //test that the results were what we intended
+    public function testDnaMatch() {
+        $this->drupalGet('dna-matcher-results');
+        $this->assertText('T A G C A T', 'The conversion was successful.');
+    }
+}

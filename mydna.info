@@ -1,0 +1,7 @@
+name = My DNA Module
+description = This module takes a DNA sequence and returns the other half of the helix.
+package = Tom's Modules
+core = 7.x
+files[] = mydna.module
+files[] = mydna.test
+dependencies[] = simpletest

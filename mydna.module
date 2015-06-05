@@ -1,0 +1,77 @@
+<?php
+function match_dna($dna) {
+    $dna = strtoupper($dna);
+    $converted_string = "";
+    for($i = 0; $i < strlen($dna); $i++) {
+        switch($dna[$i]) {
+            case 'A':
+                $converted_string .= 'T';
+                break;
+            case 'T':
+                $converted_string .= 'A';
+                break;
+            case 'C':
+                $converted_string .= 'G';
+                break;
+            case 'G':
+                $converted_string .= 'C';
+                break;
+            default:
+                $converted_string .= ' ';
+        }
+    }
+    return $converted_string;
+}
+
+function mydna_menu() {
+    $items['dna-matcher'] = array(
+        'title' => 'DNA Matcher',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('create_dna_form'),
+        'access callback' => TRUE,
+        'type' => MENU_NORMAL_ITEM,
+    );
+    $items['dna-matcher-results'] = array(
+        'title' => 'DNA Matcher Results',
+        'page callback' => 'create_dna_results',
+        'access callback' => TRUE,
+        'type' => MENU_CALLBACK,
+    );
+    return $items;
+}
+
+function create_dna_form() {
+    $form['dna_input'] = array(
+        '#title' => 'DNA Input',
+        '#type' => 'textfield',
+        '#description' => 'Input the first side of the DNA helix. Ex. A T T A C G',
+        '#element_validate' => array('element_validate_DNA'),
+        '#required' => TRUE,
+    );
+    $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => 'Match',
+    );
+    return $form;
+}
+
+function element_validate_DNA($element) {
+    if(strlen($element['#value']) < 1 || strlen($element['#value']) > 50) {
+        form_error($element, t('The string must be 1 to 50 characters long.'));
+    }
+    elseif(preg_match("/[^ATCG ]+/i", $element['#value'])) {
+        form_error($element, t('Valid letters are A T C G'));
+    }
+}
+
+//when the form is submitted
+function create_dna_form_submit($form, &$form_state) {
+    $_SESSION['dna_input'] = $form_state['values']['dna_input'];
+    $form_state['redirect'] = 'dna-matcher-results';
+}
+
+function create_dna_results() {
+    $input = $_SESSION['dna_input'];
+    $results = match_dna($input);
+    return "<h3>Your Results:</h3><p>$input</p><p>$results</p><a href='dna-matcher'>Enter a new value</a>";
+}
